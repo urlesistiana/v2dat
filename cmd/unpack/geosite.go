@@ -3,25 +3,20 @@ package unpack
 import (
 	"bufio"
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/urlesistiana/v2dat/v2data"
-	"go.uber.org/zap"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/cobra"
+	"github.com/urlesistiana/v2dat/v2data"
+	"go.uber.org/zap"
 )
 
-type unpackArgs struct {
-	outDir  string
-	file    string
-	filters []string
-}
-
 func newGeoSiteCmd() *cobra.Command {
-	args := new(unpackArgs)
+	args := new(UnpackArgs)
 	c := &cobra.Command{
-		Use:   "geosite [-o output_dir] [-f tag[@attr]...]... geosite.dat",
+		Use:   "geosite",
 		Args:  cobra.ExactArgs(1),
 		Short: "Unpack geosite file to text files.",
 		Run: func(cmd *cobra.Command, a []string) {
@@ -32,12 +27,14 @@ func newGeoSiteCmd() *cobra.Command {
 		},
 		DisableFlagsInUseLine: true,
 	}
+	c.Flags().BoolVarP(&args.with_type_prefix, "with_type_prefix", "p", false, "with type prefix geosite")
 	c.Flags().StringVarP(&args.outDir, "out", "o", "", "output dir")
 	c.Flags().StringArrayVarP(&args.filters, "filter", "f", nil, "unpack given tag and attrs")
 	return c
 }
 
-func unpackGeoSite(args *unpackArgs) error {
+func unpackGeoSite(args *UnpackArgs) error {
+	fmt.Println(args.with_type_prefix)
 	filePath, suffixes, outDir := args.file, args.filters, args.outDir
 	b, err := os.ReadFile(filePath)
 	if err != nil {
@@ -55,7 +52,7 @@ func unpackGeoSite(args *unpackArgs) error {
 	}
 
 	save := func(suffix string, data []*v2data.Domain) error {
-		file := fmt.Sprintf("%s_%s.txt", fileName(filePath), suffix)
+		file := unpackPath(fileName(filePath), suffix, args.with_type_prefix)
 		if len(outDir) > 0 {
 			file = filepath.Join(outDir, file)
 		}
