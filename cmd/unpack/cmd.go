@@ -5,6 +5,13 @@ import (
 	"github.com/urlesistiana/v2dat/cmd"
 )
 
+type UnpackArgs struct {
+	outDir           string
+	file             string
+	filters          []string
+	with_type_prefix bool
+}
+
 var unpack = &cobra.Command{
 	Use:   "unpack",
 	Short: "unpack geosite and geoip to text files.",

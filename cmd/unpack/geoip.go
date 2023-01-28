@@ -3,20 +3,21 @@ package unpack
 import (
 	"bufio"
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/urlesistiana/v2dat/v2data"
-	"go.uber.org/zap"
 	"io"
 	"net/netip"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/cobra"
+	"github.com/urlesistiana/v2dat/v2data"
+	"go.uber.org/zap"
 )
 
 func newGeoIPCmd() *cobra.Command {
-	args := new(unpackArgs)
+	args := new(UnpackArgs)
 	c := &cobra.Command{
-		Use:   "geoip [-o output_dir] [-f tag]... geoip.dat",
+		Use:   "geoip",
 		Args:  cobra.ExactArgs(1),
 		Short: "Unpack geoip file to text files.",
 		Run: func(cmd *cobra.Command, a []string) {
@@ -27,12 +28,13 @@ func newGeoIPCmd() *cobra.Command {
 		},
 		DisableFlagsInUseLine: true,
 	}
+	c.Flags().BoolVarP(&args.with_type_prefix, "with_type_prefix", "p", false, "with type prefix geoip")
 	c.Flags().StringVarP(&args.outDir, "out", "o", "", "output dir")
 	c.Flags().StringArrayVarP(&args.filters, "filter", "f", nil, "unpack given tag")
 	return c
 }
 
-func unpackGeoIP(args *unpackArgs) error {
+func unpackGeoIP(args *UnpackArgs) error {
 	filePath, wantTags, ourDir := args.file, args.filters, args.outDir
 	b, err := os.ReadFile(filePath)
 	if err != nil {
@@ -64,7 +66,7 @@ func unpackGeoIP(args *unpackArgs) error {
 	}
 
 	for tag, ipList := range wantEntries {
-		file := fmt.Sprintf("%s_%s.txt", fileName(filePath), tag)
+		file := unpackPath(fileName(filePath), tag, args.with_type_prefix)
 		if len(ourDir) > 0 {
 			file = filepath.Join(ourDir, file)
 		}

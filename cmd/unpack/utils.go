@@ -1,13 +1,25 @@
 package unpack
 
 import (
-	"github.com/urlesistiana/v2dat/mlog"
-	"github.com/urlesistiana/v2dat/v2data"
+	"fmt"
 	"path/filepath"
 	"strings"
+
+	"github.com/urlesistiana/v2dat/mlog"
+	"github.com/urlesistiana/v2dat/v2data"
 )
 
 var logger = mlog.L()
+
+func unpackPath(filePath string, suffix string, with_prefix bool) string {
+	path := fmt.Sprintf("%s.txt", suffix)
+
+	if with_prefix {
+		path = fmt.Sprintf("%s_%s", filePath, path)
+	}
+
+	return path
+}
 
 func splitAttrs(s string) (string, map[string]struct{}) {
 	tag, attrs, ok := strings.Cut(s, "@")
